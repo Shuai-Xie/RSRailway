@@ -1,7 +1,7 @@
 # RSRailway
 
-- RS_detection, DOTA 15 classes + Railway 2 classses: 'train', 'rail'
-- RS_segmentation, 7 classes:  'rail', 'plant', 'buildings', 'road', 'land', 'water', 'train'
+- **RS_detection:** DOTA 15 classes + Railway 2 classses: 'train', 'rail'
+- **RS_segmentation:** 7 classes:  'rail', 'plant', 'buildings', 'road', 'land', 'water', 'train'
 
 ---
 
