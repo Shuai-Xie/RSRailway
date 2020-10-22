@@ -1,0 +1,10 @@
+.DS_Store
+
+./datasets/DOTA_devkit
+
+data
+datasets/DOTA_devkit
+.idea
+*/__pycache__
+
+z.py
