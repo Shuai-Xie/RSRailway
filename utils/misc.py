@@ -58,22 +58,23 @@ def color_code_target(target, label_colors):
     return np.array(label_colors)[target.astype('int')]
 
 
-def plt_img_target(img, target, label_colors=None, title=None):
+def plt_img_target(img, target, label_colors=None, title=None, save_path=None):
     f, axs = plt.subplots(nrows=1, ncols=2, dpi=100)
     f.set_size_inches((16, 6))
     ax1, ax2 = axs.flat[0], axs.flat[1]
 
     # ax1.axis('off')
     ax1.imshow(img)
-    ax1.set_title('detect')
 
     # ax2.axis('off')
     if label_colors is not None:
         target = color_code_target(target, label_colors)
     ax2.imshow(target)
-    ax1.set_title('segment')
 
     if title:
         plt.suptitle(title)
+
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight', pad_inches=0.0)
 
     plt.show()

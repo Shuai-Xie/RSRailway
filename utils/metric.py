@@ -15,19 +15,20 @@ class SegmentationMetric(object):
         Acc = np.nanmean(Acc)
         return Acc
 
-    def Mean_Intersection_over_Union(self):
-        MIoU = np.diag(self.confusion_matrix) / (
+    def Intersection_over_Union_Class(self):
+        iu = np.diag(self.confusion_matrix) / (
                 np.sum(self.confusion_matrix, axis=1) + np.sum(self.confusion_matrix, axis=0) -
                 np.diag(self.confusion_matrix))
-        MIoU = np.nanmean(MIoU)
+        return iu
+
+    def Mean_Intersection_over_Union(self):
+        iu = self.Intersection_over_Union_Class()
+        MIoU = np.nanmean(iu)
         return MIoU
 
     def Frequency_Weighted_Intersection_over_Union(self):
         freq = np.sum(self.confusion_matrix, axis=1) / np.sum(self.confusion_matrix)
-        iu = np.diag(self.confusion_matrix) / (
-                np.sum(self.confusion_matrix, axis=1) + np.sum(self.confusion_matrix, axis=0) -
-                np.diag(self.confusion_matrix))
-
+        iu = self.Intersection_over_Union_Class()
         FWIoU = (freq[freq > 0] * iu[freq > 0]).sum()
         return FWIoU
 

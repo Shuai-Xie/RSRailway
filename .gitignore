@@ -6,5 +6,6 @@ data
 datasets/DOTA_devkit
 .idea
 */__pycache__
+results
 
 z.py

@@ -68,7 +68,7 @@ def load_dec_model():
                    pretrained=False, down_ratio=down_ratio,
                    final_kernel=1, head_channels=256)
     # load param
-    resume = 'runs/railway/dec_res101_epoch50_Oct22_105241/model_best.pth'
+    resume = 'runs/railway/dec_res101_epoch100_data1501_Oct22_143548/model_best.pth'
     checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
     state_dict_ = checkpoint['model_state_dict']
     model.load_state_dict(state_dict_, strict=True)
@@ -79,7 +79,7 @@ def load_dec_model():
 
 def load_seg_model():
     model = CTRSEG(num_classes=seg_classes, pretrained=False)
-    resume = 'runs/railway/seg_cls7_res101_Oct22_133551/model_best.pth'
+    resume = 'runs/railway/seg_cls7_res101_data100_Oct22_144156/model_best.pth'
     checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
     state_dict_ = checkpoint['state_dict']
     model.load_state_dict(state_dict_, strict=True)
@@ -120,17 +120,27 @@ def segment(image):
 
 
 if __name__ == '__main__':
-    img_dir = 'data/dota'
+    # img_dir = 'data/dota'
+    img_dir = 'data/geo_hazard'
+    # img_dir = '/datasets/rs_segment/railway/train/images'
+    # img_dir = '/datasets/rs_detect/railway/train/images'
 
     dec_model = load_dec_model()
-    decoder = DecDecoder(K=500, conf_thresh=0.2, num_classes=dec_classes)
+    decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=dec_classes)
 
     seg_model = load_seg_model()
     test_trans = tr.get_test_transfrom()
 
     remap_fn = tr.remap(bg_idx=0)
 
+    save_dir = 'results'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
     for img in os.listdir(img_dir):
+        if img == '@eaDir':
+            continue
+
         print(img)
 
         # preprocess
@@ -144,4 +154,8 @@ if __name__ == '__main__':
 
         # segment
         seg_img = segment(image)
-        plt_img_target(dec_img[:, :, ::-1], seg_img, label_colors)
+        plt_img_target(dec_img[:, :, ::-1], seg_img, label_colors,
+                       title=img,
+                       # save_path=f'{save_dir}/{img}'
+                       )
+        # plt_img_target(ori_image[:, :, ::-1], seg_img, label_colors)

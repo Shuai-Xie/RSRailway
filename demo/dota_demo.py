@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from models import ctrbox_net
 
-from utils.func_utils import decode_prediction, non_maximum_suppression, preprocess, draw_results
+from utils.func_utils import decode_prediction, non_maximum_suppression, draw_results
 from utils.decoder import DecDecoder
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -80,11 +80,20 @@ def infer(image):
     return results
 
 
+def preprocess(image, input_w, input_h):
+    image = cv2.resize(image, (input_w, input_h))
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    out_image = image / 255. - 0.5
+    out_image = out_image.transpose(2, 0, 1).reshape(1, 3, input_h, input_w).astype(np.float32)
+    out_image = torch.from_numpy(out_image)
+    return out_image
+
+
 if __name__ == '__main__':
     decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=num_classes)
     model = load_model()
 
-    img_dir = 'data/dota'
+    img_dir = 'data/geo_hazard/6_汽车误入'
     for img in os.listdir(img_dir):
         print(img)
         ori_img = cv2.imread(os.path.join(img_dir, img))
