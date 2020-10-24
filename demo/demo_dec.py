@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from models.ctrbox_net import CTRBOX
 from tqdm import tqdm
 
+from datasets.config.railway import dec_label_names
+
 from utils.func_utils import *
 from utils.decoder import DecDecoder
 from utils.misc import *
@@ -19,27 +21,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 # dota
 dec_classes = 17
 input_w, input_h = 960, 540
-down_ratio = 4
-
-category = [
-    'plane',
-    'baseball-diamond',
-    'bridge',
-    'ground-track-field',
-    'small-vehicle',
-    'large-vehicle',
-    'ship',
-    'tennis-court',
-    'basketball-court',
-    'storage-tank',
-    'soccer-ball-field',
-    'roundabout',
-    'harbor',
-    'swimming-pool',
-    'helicopter',
-    'train',
-    'rail',
-]
+category = dec_label_names
 
 
 def load_dec_model():
@@ -52,7 +34,7 @@ def load_dec_model():
     }
 
     model = CTRBOX(heads,
-                   pretrained=False, down_ratio=down_ratio,
+                   pretrained=False, down_ratio=4,
                    final_kernel=1, head_channels=256)
     # load param
     resume = 'runs/railway/dec_res101_epoch100_data1501_Oct22_143548/model_best.pth'
@@ -65,13 +47,13 @@ def load_dec_model():
 
 
 @torch.no_grad()
-def detect(image):
-    pr_decs = dec_model(image)
+def detect(model, image, decoder, input_w, input_h, ori_w, ori_h):
+    pr_decs = model(image)
 
     # heatmap point nms + topK + conf_thresh + HBB/RBB 解析
     predictions = decoder.ctdet_decode(pr_decs)  # np -> 1,num_obj,12 = 2+8+1+1
     # 解析 predictions 得到 dict 类型结果
-    cat_pts, cat_scores = decode_prediction(predictions, category, input_w, input_h, ori_w, ori_h, down_ratio)
+    cat_pts, cat_scores = decode_prediction(predictions, category, input_w, input_h, ori_w, ori_h, down_ratio=4)
 
     results = {cat: None for cat in category}
 
@@ -103,11 +85,11 @@ def detect(image):
     return results
 
 
-if __name__ == '__main__':
-    # img_dir = 'data/dota'
-    img_dir = 'data/geo_hazard/6_汽车误入'
+def demo_dir():
+    img_dir = 'data/railway/img'
+    # img_dir = 'data/geo_hazard/6_汽车误入'
 
-    dec_model = load_dec_model()
+    model = load_dec_model()
     decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=dec_classes)
 
     for img in tqdm(os.listdir(img_dir)):
@@ -120,12 +102,18 @@ if __name__ == '__main__':
         ori_h, ori_w, _ = ori_image.shape
         image = preprocess(ori_image, input_w, input_h).cuda()
 
-        # # detect
-        results = detect(image)
-        plt_results(results, ori_image)
+        # detect
+        results = detect(model, image, decoder,
+                         input_w, input_h, ori_w, ori_h)
 
-        # dec_img = draw_results(results, ori_image)
-        # plt.figure(figsize=(9, 6))
-        # plt.imshow(dec_img[:, :, ::-1])
-        # plt.show()
-        # cv2.imwrite(f'{img_dir}/{img[:-4]}_dec.png', dec_img)
+        # vis_plt
+        plt_results(results, ori_image, vis=False, save_path=f'data/railway/dec_plt/{img}')
+
+        # vis_cv
+        dec_img = draw_results(results, ori_image)
+        cv2.imwrite(f'data/railway/dec_cv/{img}', dec_img)
+
+
+if __name__ == '__main__':
+    demo_dir()
+    pass
