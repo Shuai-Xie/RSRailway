@@ -1,36 +1,40 @@
-railway_train_stats = {
-    1: 193,
-    2: 184,
-    3: 166,
-    4: 109,
-    5: 61,
-    6: 57,
-    7: 38,
-    8: 38,
-    9: 39,
-    10: 32,
-    11: 17,
-    12: 16,
-    13: 16,
-    14: 6,
-    15: 8,
-    16: 8,
-    19: 3,
-    20: 1,
-    21: 3,
-    22: 3,
-    23: 1,
-    24: 1,
-    33: 1
-}
-import matplotlib.pyplot as plt
+category = [
+    'plane',
+    'baseball-diamond',
+    'bridge',
+    'ground-track-field',
+    'small-vehicle',
+    'large-vehicle',
+    'ship',
+    'tennis-court',
+    'basketball-court',
+    'storage-tank',
+    'soccer-ball-field',
+    'roundabout',
+    'harbor',
+    'swimming-pool',
+    'helicopter',
+    'train',  # 添加火车和轨道
+    'rail',
+]
+color_pans = [
+    (204, 78, 210),
+    (0, 192, 255),
+    (0, 131, 0),
+    (240, 176, 0),
+    (254, 100, 38),
+    (0, 0, 255),
+    (182, 117, 46),
+    (185, 60, 129),
+    (204, 153, 255),
+    (80, 208, 146),
+    (0, 0, 204),
+    (17, 90, 197),
+    (0, 255, 255),
+    (102, 255, 102),
+    (255, 255, 0),
+    (255, 0, 0),  # 红
+    (0, 255, 0),  # 绿
+]
 
-xs = list(railway_train_stats.keys())
-ys = list(railway_train_stats.values())
-
-plt.figure(figsize=(10, 3))
-plt.plot(xs, ys)
-plt.xlabel('objs')
-plt.ylabel('imgs')
-plt.title('Railway objs: 1-33, total: {}'.format(sum(ys)))
-plt.show()
+color_map = {k: v for k, v in zip(category, color_pans)}

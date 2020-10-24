@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from models.ctrbox_net import CTRBOX
 from tqdm import tqdm
 
-from utils.func_utils import decode_prediction, non_maximum_suppression, preprocess, draw_results
+from utils.func_utils import *
 from utils.decoder import DecDecoder
 from utils.misc import *
+from pprint import pprint
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
@@ -72,7 +73,7 @@ def detect(image):
     # 解析 predictions 得到 dict 类型结果
     cat_pts, cat_scores = decode_prediction(predictions, category, input_w, input_h, ori_w, ori_h, down_ratio)
 
-    results = {cat: [] for cat in category}
+    results = {cat: None for cat in category}
 
     # multi-label nms 逐类 nms
     for cat in category:
@@ -81,8 +82,23 @@ def detect(image):
         scores = np.asarray(scores, np.float32)
 
         if pts.shape[0]:  # 存在 obj
-            nms_results = non_maximum_suppression(pts, scores)
-            results[cat].extend(nms_results)
+            results[cat] = non_maximum_suppression(pts, scores)  # n,9
+
+    # 剩下的框统一 nms
+    dets = np.zeros((0, 9))
+    cats = []
+    for cat, result in results.items():
+        if result is None:
+            continue
+        dets = np.vstack((dets, result))
+        cats += [cat] * result.shape[0]
+
+    keep_index = py_cpu_nms_poly_fast(dets=dets, thresh=0.05)  # 0.1
+
+    results = {cat: [] for cat in category}
+    for idx in keep_index:
+        # 对应类别添加对应 dec
+        results[cats[idx]].append(dets[idx])
 
     return results
 
@@ -92,12 +108,11 @@ if __name__ == '__main__':
     img_dir = 'data/geo_hazard/6_汽车误入'
 
     dec_model = load_dec_model()
-    decoder = DecDecoder(K=500, conf_thresh=0.1, num_classes=dec_classes)
+    decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=dec_classes)
 
     for img in tqdm(os.listdir(img_dir)):
         if img == '@eaDir' or img.endswith('seg.png') or img.endswith('dec.png'):  # 跳过 dec/seg 结果
             continue
-
         print(img)
 
         # preprocess
@@ -107,9 +122,10 @@ if __name__ == '__main__':
 
         # # detect
         results = detect(image)
-        dec_img = draw_results(results, ori_image)
+        plt_results(results, ori_image)
 
-        plt.imshow(dec_img[:, :, ::-1])
-        plt.show()
-
-        # cv2.imwrite(f'results/{img}', dec_img)
+        # dec_img = draw_results(results, ori_image)
+        # plt.figure(figsize=(9, 6))
+        # plt.imshow(dec_img[:, :, ::-1])
+        # plt.show()
+        # cv2.imwrite(f'{img_dir}/{img[:-4]}_dec.png', dec_img)
