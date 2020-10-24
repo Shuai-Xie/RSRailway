@@ -1,4 +1,5 @@
-category = [
+# detect
+dec_label_names = [
     'plane',
     'baseball-diamond',
     'bridge',
@@ -17,7 +18,7 @@ category = [
     'train',  # 添加火车和轨道
     'rail',
 ]
-color_pans = [
+dec_label_colors = [
     (204, 78, 210),
     (0, 192, 255),
     (0, 131, 0),
@@ -37,4 +38,19 @@ color_pans = [
     (0, 255, 0),  # 绿
 ]
 
-color_map = {k: v for k, v in zip(category, color_pans)}
+dec_color_map = {k: v for k, v in zip(dec_label_names, dec_label_colors)}
+
+# segment
+seg_label_names = ['bg', 'rail', 'plant', 'buildings', 'road', 'land', 'water', 'train']
+seg_label_colors = [
+    (0, 0, 0),
+    (0, 0, 255),  # 铁轨
+    (0, 255, 0),
+    (255, 0, 0),
+    (255, 0, 255),  # road 公路   粉
+    (255, 255, 0),  # land 黄土地  黄
+    (0, 255, 255),  # water
+    (128, 128, 128),  # train
+]
+
+seg_color_map = {k: v for k, v in zip(dec_label_names, dec_label_colors)}
