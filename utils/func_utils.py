@@ -76,7 +76,7 @@ def non_maximum_suppression(pts, scores):
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
-from datasets.config.railway import color_map
+from datasets.config.railway import dec_color_map
 import shapely.geometry as sgeo
 
 
@@ -103,7 +103,7 @@ def plt_results(results, ori_image, vis=True, save_path=None):
     for cat, result in results.items():
         if result is None:
             continue
-        for pred in result:
+        for idx, pred in enumerate(result):
             score = pred[-1]
 
             tl = np.asarray([pred[0], pred[1]], np.float32)
@@ -117,9 +117,9 @@ def plt_results(results, ori_image, vis=True, save_path=None):
             # Polygon: matplotlib(plt) / shapely(sgeo) 
             poly = patches.Polygon(valid_box(sgeo.Polygon(box), img_poly))
             polygons.append(poly)
-            colors.append(color_map[cat])
+            colors.append(dec_color_map[cat])
 
-            plt.annotate('%s:%.3f' % (cat, score),
+            plt.annotate('%s_%d:%.3f' % (cat, idx + 1, score),
                          xy=cen_pts, xycoords='data', xytext=(+7, +10), textcoords='offset points',
                          color='white',
                          bbox=dict(facecolor='black', alpha=0.5))
@@ -138,6 +138,11 @@ def plt_results(results, ori_image, vis=True, save_path=None):
 
 
 def draw_results(results, ori_image):
+    """
+    :param results: { cat: boxes (n,9) 4 顶点 }
+    :param ori_image:
+    :return:
+    """
     h, w, _ = ori_image.shape
     img_bounds = np.array([[0, 0], [w - 1, 0], [w - 1, h - 1], [0, h - 1]], dtype=int)
     img_poly = sgeo.Polygon(img_bounds)
@@ -145,7 +150,7 @@ def draw_results(results, ori_image):
     for cat, result in results.items():
         if result is None:
             continue
-        for pred in result:  # result, (n,9)
+        for pred in result:
             score = pred[-1]
             tl = np.asarray([pred[0], pred[1]], np.float32)
             tr = np.asarray([pred[2], pred[3]], np.float32)
