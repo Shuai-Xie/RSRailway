@@ -2,6 +2,7 @@ import os, shutil
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 
 def dist_ab(a, b):
@@ -140,3 +141,16 @@ def plt_compare_seg(target, pred, label_colors, title=None, save_path=None):
         plt.savefig(save_path, bbox_inches='tight', pad_inches=0.0)
 
     plt.show()
+
+
+def recover_color_img(img):
+    """
+    cvt tensor image to RGB [note: not BGR]
+    """
+    if isinstance(img, torch.Tensor):
+        img = img.detach().cpu().numpy()
+
+    img = np.transpose(img, axes=[1, 2, 0])  # h,w,c
+    img = img * (0.229, 0.224, 0.225) + (0.485, 0.456, 0.406)  # 直接通道相成?
+    img = (img * 255).astype('uint8')
+    return img

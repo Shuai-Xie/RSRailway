@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 
 try:
     from torch.hub import load_state_dict_from_url
@@ -117,6 +118,54 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
+
+
+class resnet32(nn.Module):
+    def __init__(self, num_classes, block=BasicBlock, layers=(5, 5, 5)):
+        """conv + fc = 32"""
+        super(resnet32, self).__init__()
+        self.in_planes = 16  # 更小的 resnet
+
+        self.conv1 = nn.Conv2d(3, self.in_planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(self.in_planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.layer1 = self._make_layer(block, 16, layers[0], stride=1)  # expansion=1
+        self.layer2 = self._make_layer(block, 32, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, 64, layers[2], stride=2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(64, num_classes)
+        self._init_weights()
+
+    def _make_layer(self, block, planes, num_blocks, stride):
+        strides = [stride] + [1] * (num_blocks - 1)  # 内部 stride=1
+        layers = []
+        for stride in strides:
+            layers.append(block(self.in_planes, planes, stride))
+            self.in_planes = planes * block.expansion
+
+        return nn.Sequential(*layers)
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        x = self.avgpool(x)  # B,1,1
+        x = torch.flatten(x, 1)  # B,1
+        x = self.fc(x)
+        return x
 
 
 class ResNet(nn.Module):

@@ -70,14 +70,13 @@ def cvt_4k_to_1k():
 
 
 def cvt_4k_to_1k_dir():
-    img_dir = 'data/geo_hazard/5_异物侵线'
+    img_dir = 'data/geo_hazard/7_恶劣天气'
     dsize = (960, 540)
 
     for img_name in os.listdir(img_dir):
-        if img_name.endswith('hzd.png'):
-            img = cv2.imread(os.path.join(img_dir, img_name))
-            img = cv2.resize(img, dsize, interpolation=cv2.INTER_LINEAR)
-            cv2.imwrite(os.path.join(img_dir, img_name), img)
+        img = cv2.imread(os.path.join(img_dir, img_name))
+        img = cv2.resize(img, dsize, interpolation=cv2.INTER_LINEAR)
+        cv2.imwrite(os.path.join(img_dir, img_name), img)
 
 
 cvt_4k_to_1k_dir()

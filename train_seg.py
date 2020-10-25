@@ -1,4 +1,9 @@
 import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 import torch
 import torch.nn as nn
 from models.ctrseg_net import CTRSEG
@@ -8,10 +13,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils.metric import SegmentationMetric
 from utils.misc import *
-
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 num_classes = 7
 

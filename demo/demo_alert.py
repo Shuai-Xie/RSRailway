@@ -41,7 +41,7 @@ class RailwayAlert:
         self.seg_classes = 7
         self.dec_classes = 17
 
-        # self.seg_model = load_seg_model()
+        self.seg_model = load_seg_model()
         self.dec_model = load_dec_model()
 
         self.decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=self.dec_classes)
@@ -263,12 +263,12 @@ class RailwayAlert:
 
 if __name__ == '__main__':
     seg_pairs = [
-        # ('data/geo_hazard/1_轨道变形/1_ori_class.png', 'data/geo_hazard/1_轨道变形/1_hzd.png'),
-        # ('data/geo_hazard/2_水漫线路/1_ori_class.png', 'data/geo_hazard/2_水漫线路/1_hzd.png'),
-        # ('data/geo_hazard/3_植被退化/1_ori_class.png', 'data/geo_hazard/3_植被退化/1_hzd.png'),
-        # ('data/geo_hazard/4_水域干涸/1_ori_class.png', 'data/geo_hazard/4_水域干涸/1_hzd.png'),
-        # ('data/geo_hazard/5_异物侵线/1_ori_class.png', 'data/geo_hazard/5_异物侵线/1_hzd.png'),
-        # ('data/geo_hazard/5_异物侵线/2_ori_class.png', 'data/geo_hazard/5_异物侵线/2_hzd.png'),
+        ('data/geo_hazard/1_轨道变形/1_ori_class.png', 'data/geo_hazard/1_轨道变形/1_hzd.png'),
+        ('data/geo_hazard/2_水漫线路/1_ori_class.png', 'data/geo_hazard/2_水漫线路/1_hzd.png'),
+        ('data/geo_hazard/3_植被退化/1_ori_class.png', 'data/geo_hazard/3_植被退化/1_hzd.png'),
+        ('data/geo_hazard/4_水域干涸/1_ori_class.png', 'data/geo_hazard/4_水域干涸/1_hzd.png'),
+        ('data/geo_hazard/5_异物侵线/1_ori_class.png', 'data/geo_hazard/5_异物侵线/1_hzd.png'),
+        ('data/geo_hazard/5_异物侵线/2_ori_class.png', 'data/geo_hazard/5_异物侵线/2_hzd.png'),
         ('data/geo_hazard/5_异物侵线/3_ori_class.png', 'data/geo_hazard/5_异物侵线/3_hzd.png'),
         ('data/geo_hazard/5_异物侵线/4_ori_class.png', 'data/geo_hazard/5_异物侵线/4_hzd.png'),
     ]
