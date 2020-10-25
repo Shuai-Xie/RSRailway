@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from datasets.config.railway import cls_label_names
 import torchvision.transforms as tr
 from PIL import Image
+import random
 
 
 class NWPU46(Dataset):
@@ -24,9 +25,12 @@ class NWPU46(Dataset):
 
         self.transform = self.get_transform(split)
 
+        random.seed(100)
+
         for idx, cat in enumerate(self.label_names):
             sub_dir = os.path.join(base_dir, cat)
             img_list = [os.path.join(sub_dir, p) for p in os.listdir(sub_dir) if p != '@eaDir']
+            random.shuffle(img_list)
             num_per_class = min(num_per_class, len(img_list))
 
             if split == 'train':

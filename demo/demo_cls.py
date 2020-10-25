@@ -1,4 +1,12 @@
+"""
+地面网格场景分类，46类
+    恶劣天气 云层检测
+    地面车站定位
+"""
 import os
+import sys
+
+sys.path.insert(0, '/nfs/xs/Codes/BBAVectors-Oriented-Object-Detection')
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
@@ -34,7 +42,7 @@ translate = np.vectorize(lambda t: cls_label_names[t])
 
 
 @torch.no_grad()
-def sliding_predict(model, img, crop_size=224, overlap=0.25):
+def sliding_predict(model, img, crop_size=224, overlap=0):
     img = test_trans(img)
     img = img.unsqueeze(0).cuda()
     _, _, H, W = img.shape
@@ -78,6 +86,7 @@ def sliding_predict(model, img, crop_size=224, overlap=0.25):
 
 def demo_dir():
     data_dir = 'data/geo_hazard/7_恶劣天气'
+    # data_dir = 'data/geo_hazard/8_车站定位'
     for img in os.listdir(data_dir):
         print(img)
         image = Image.open(os.path.join(data_dir, img))

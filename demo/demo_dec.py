@@ -1,6 +1,12 @@
 """
 地物检测，17类目标检测
 """
+import os
+
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
 import torch
 import cv2
 import matplotlib.pyplot as plt
@@ -13,10 +19,6 @@ from utils.func_utils import *
 from utils.decoder import DecDecoder
 from utils.misc import *
 from pprint import pprint
-
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 # dota
 dec_classes = 17

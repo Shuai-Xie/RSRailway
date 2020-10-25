@@ -3,9 +3,9 @@
 """
 import os
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
+# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 import cv2
 import torch

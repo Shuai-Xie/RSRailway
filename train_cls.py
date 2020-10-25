@@ -36,8 +36,8 @@ def load_model(arch, num_classes):
 
 def build_datasets():
     base_dir = '/datasets/rs_classify/NWPU_RESISC46'
-    trainset = NWPU46(base_dir, split='train', num_per_class=400)
-    testset = NWPU46(base_dir, split='test', num_per_class=300)
+    trainset = NWPU46(base_dir, split='train', num_per_class=500)
+    testset = NWPU46(base_dir, split='test', num_per_class=200)
     return trainset, testset
 
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     save_path = os.path.join('runs', 'railway', f'cls_{arch}_bs{bs}_{get_curtime()}')
     writer = SummaryWriter(save_path)
 
-    num_epochs = 100
+    num_epochs = 60
 
     lr = 1e-3
     optimizer = torch.optim.SGD(model.parameters(), lr, momentum=0.9, weight_decay=5e-4)

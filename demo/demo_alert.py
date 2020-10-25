@@ -14,10 +14,13 @@ detect
     7.经过桥梁，水中船只，不算
 """
 import os
+import sys
+
+sys.path.insert(0, '/nfs/xs/Codes/BBAVectors-Oriented-Object-Detection')
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_HOME"] = "/nfs/xs/local/cuda-10.2"
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 import cv2
 import numpy as np
@@ -41,7 +44,7 @@ class RailwayAlert:
         self.seg_classes = 7
         self.dec_classes = 17
 
-        self.seg_model = load_seg_model()
+        # self.seg_model = load_seg_model()
         self.dec_model = load_dec_model()
 
         self.decoder = DecDecoder(K=500, conf_thresh=0.18, num_classes=self.dec_classes)
@@ -77,7 +80,7 @@ class RailwayAlert:
                              self.input_w, self.input_h, ori_w, ori_h)
 
         if vis:
-            plt_results(dec_results, ori_image)
+            plt_results(dec_results, ori_image, vis=False, save_path=test_path.replace('.png', '_det.png'))
 
         # 预警类，取物体中心
         alter_cls = ['small-vehicle', 'large-vehicle', 'helicopter', 'plane', 'ship']  # 可活动类，潜在危险
@@ -262,29 +265,29 @@ class RailwayAlert:
 
 
 if __name__ == '__main__':
-    seg_pairs = [
-        ('data/geo_hazard/1_轨道变形/1_ori_class.png', 'data/geo_hazard/1_轨道变形/1_hzd.png'),
-        ('data/geo_hazard/2_水漫线路/1_ori_class.png', 'data/geo_hazard/2_水漫线路/1_hzd.png'),
-        ('data/geo_hazard/3_植被退化/1_ori_class.png', 'data/geo_hazard/3_植被退化/1_hzd.png'),
-        ('data/geo_hazard/4_水域干涸/1_ori_class.png', 'data/geo_hazard/4_水域干涸/1_hzd.png'),
-        ('data/geo_hazard/5_异物侵线/1_ori_class.png', 'data/geo_hazard/5_异物侵线/1_hzd.png'),
-        ('data/geo_hazard/5_异物侵线/2_ori_class.png', 'data/geo_hazard/5_异物侵线/2_hzd.png'),
-        ('data/geo_hazard/5_异物侵线/3_ori_class.png', 'data/geo_hazard/5_异物侵线/3_hzd.png'),
-        ('data/geo_hazard/5_异物侵线/4_ori_class.png', 'data/geo_hazard/5_异物侵线/4_hzd.png'),
-    ]
+    ra = RailwayAlert()
+
+    # seg_pairs = [
+    #     ('data/geo_hazard/1_轨道变形/1_ori_class.png', 'data/geo_hazard/1_轨道变形/1_hzd.png'),
+    #     ('data/geo_hazard/2_水漫线路/1_ori_class.png', 'data/geo_hazard/2_水漫线路/1_hzd.png'),
+    #     ('data/geo_hazard/3_植被退化/1_ori_class.png', 'data/geo_hazard/3_植被退化/1_hzd.png'),
+    #     ('data/geo_hazard/4_水域干涸/1_ori_class.png', 'data/geo_hazard/4_水域干涸/1_hzd.png'),
+    #     ('data/geo_hazard/5_异物侵线/1_ori_class.png', 'data/geo_hazard/5_异物侵线/1_hzd.png'),
+    #     ('data/geo_hazard/5_异物侵线/2_ori_class.png', 'data/geo_hazard/5_异物侵线/2_hzd.png'),
+    #     ('data/geo_hazard/5_异物侵线/3_ori_class.png', 'data/geo_hazard/5_异物侵线/3_hzd.png'),
+    #     ('data/geo_hazard/5_异物侵线/4_ori_class.png', 'data/geo_hazard/5_异物侵线/4_hzd.png'),
+    # ]
+    #
+    # for base_path, test_path in seg_pairs:
+    #     print(test_path)
+    #     ra.seg_alert(base_path, test_path)
+    #     print()
 
     dec_imgs = [
         'data/geo_hazard/6_汽车误入/1.png',
         'data/geo_hazard/6_汽车误入/2.png',
     ]
 
-    ra = RailwayAlert()
-
     for test_path in dec_imgs:
         print(test_path)
         ra.dec_alert(test_path, vis=True)
-
-    # for base_path, test_path in seg_pairs:
-    #     print(test_path)
-    #     ra.seg_alert(base_path, test_path)
-    #     print()
