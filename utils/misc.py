@@ -148,7 +148,7 @@ def recover_color_img(img):
     cvt tensor image to RGB [note: not BGR]
     """
     if isinstance(img, torch.Tensor):
-        img = img.detach().cpu().numpy()
+        img = img.detach().cpu().numpy().squeeze()
 
     img = np.transpose(img, axes=[1, 2, 0])  # h,w,c
     img = img * (0.229, 0.224, 0.225) + (0.485, 0.456, 0.406)  # 直接通道相成?

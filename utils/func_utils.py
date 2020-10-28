@@ -12,7 +12,6 @@ def normalize_img(image):
 
 def preprocess(image, input_w, input_h):
     image = cv2.resize(image, (input_w, input_h))
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     out_image = normalize_img(image)
     out_image = out_image.transpose(2, 0, 1).reshape(1, 3, input_h, input_w)
     out_image = torch.from_numpy(out_image)

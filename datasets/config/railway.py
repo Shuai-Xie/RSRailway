@@ -42,6 +42,12 @@ dec_color_map = {k: v for k, v in zip(dec_label_names, dec_label_colors)}
 
 # segment
 seg_label_names = ['bg', 'rail', 'plant', 'buildings', 'road', 'land', 'water', 'train']
+seg_label_names_zh = ['背景', '铁轨', '绿植', '房屋', '道路', '黄土地', '水域', '火车']
+
+seg_map_zh = {
+    cat: cat_zh for cat, cat_zh in zip(seg_label_names, seg_label_names_zh)
+}
+
 seg_label_colors = [
     (0, 0, 0),
     (0, 0, 255),  # 铁轨
@@ -53,7 +59,7 @@ seg_label_colors = [
     (128, 128, 128),  # train
 ]
 
-seg_color_map = {k: v for k, v in zip(dec_label_names, dec_label_colors)}
+seg_color_map = {k: v for k, v in zip(seg_label_names, seg_label_names)}
 
 # classify
 

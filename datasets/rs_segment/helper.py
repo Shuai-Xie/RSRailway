@@ -74,12 +74,10 @@ def cvt_4k_to_1k_dir():
     dsize = (960, 540)
 
     for img_name in os.listdir(img_dir):
-        img = cv2.imread(os.path.join(img_dir, img_name))
-        img = cv2.resize(img, dsize, interpolation=cv2.INTER_LINEAR)
-        cv2.imwrite(os.path.join(img_dir, img_name), img)
-
-
-cvt_4k_to_1k_dir()
+        if img_name.startswith('sandstorm'):
+            img = cv2.imread(os.path.join(img_dir, img_name))
+            img = cv2.resize(img, dsize=None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+            cv2.imwrite(os.path.join(img_dir, img_name), img)
 
 
 def save_train_paths():
