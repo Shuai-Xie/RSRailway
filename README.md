@@ -14,7 +14,7 @@
     <span><b>边坡滑坡</b></span><br>
     <img src='https://img.shields.io/static/v1?label=&message=rail&color=blue'> +
     <img src='https://img.shields.io/static/v1?label=&message=train&color=red'> =
-    <img src='https://img.shields.io/static/v1?label=&message=alert area&color=brightgreen'>
+    <img src='https://img.shields.io/static/v1?label=&message=alert-area&color=brightgreen'>
     <img src='assets/边坡滑坡.png'>
     <span><b>羊群入侵</b></span>
     <img src='assets/羊群.png'>
