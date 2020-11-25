@@ -261,3 +261,54 @@ def iou_judge(target, pred, cls_idx, thre=0.1):
         less_percent * 100, more_percent * 100, cls_percent * 100)
 
     return status_ok, info, iou, less_percent, more_percent, cls_percent
+
+
+import torch
+import math
+
+
+@torch.no_grad()
+def predict_sliding(model, image,
+                    num_classes, crop_size,
+                    overlap=0.25,  # 控制 infer 数量
+                    ):
+    """
+    滑窗 infer 大图
+    @param model:
+    @param image:
+    @param num_classes:
+    @param crop_size: 大图 crop 小图，crop_size = model input size
+    @param overlap:
+    @return:
+    """
+    B, _, H, W = image.shape
+
+    # out_stirde 控制模型 输出 size， 开辟存储空间，保存输出
+    full_probs = torch.zeros((B, num_classes, H, W)).cuda()
+    cnt_preds = torch.zeros((B, num_classes, H, W)).cuda()
+
+    # row/col 滑窗范围
+    stride = int(math.ceil(crop_size * (1 - overlap)))  # overlap -> stride
+    tile_rows = int(math.ceil((H - crop_size) / stride) + 1)
+    tile_cols = int(math.ceil((W - crop_size) / stride) + 1)
+    num_tiles = tile_rows * tile_cols
+    print("Need %i x %i = %i prediction tiles @ stride %i px" % (tile_cols, tile_rows, num_tiles, stride))
+
+    for row in range(tile_rows):
+        for col in range(tile_cols):
+            # bottom-right / left-top 保证右下有效，反推左上
+            x2, y2 = min(col * stride + crop_size, W), min(row * stride + crop_size, H)
+            x1, y1 = max(int(x2 - crop_size), 0), max(int(y2 - crop_size), 0)
+
+            # crop input img
+            img = image[:, :, y1:y2, x1:x2]
+
+            out = model(img)
+            probs = out.softmax(dim=1)  # 使用 softmax 归一化后的 acc 更准确
+
+            # map image pos -> output pos
+            full_probs[:, :, y1:y2, x1:x2] += probs  # C 维 prob 之和
+            cnt_preds[:, :, y1:y2, x1:x2] += 1  # 对应 pixel 估计次数
+
+    full_probs /= cnt_preds
+    return full_probs

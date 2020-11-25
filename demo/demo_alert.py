@@ -30,7 +30,8 @@ from demo.demo_seg import segment, load_seg_model
 from demo.demo_dec import detect, load_dec_model, DecDecoder
 from demo.base import *
 from utils.func_utils import preprocess, plt_results
-from utils.misc import plt_compare_seg, box_major_axis
+from utils.misc import box_major_axis
+from utils.vis import plt_compare_seg
 
 
 class RailwayAlert:
@@ -258,7 +259,8 @@ class RailwayAlert:
                         trainkind = find_train_kind(line[:-1], self.ori_image)
                         if trainkind not in treedict[First_heading]['交通工具']['火车']:
                             treedict[First_heading]['交通工具']['火车'][trainkind] = 0
-                        treedict[First_heading]['交通工具']['火车'][trainkind] = treedict[First_heading]['交通工具']['火车'][trainkind] + 1
+                        treedict[First_heading]['交通工具']['火车'][trainkind] = treedict[First_heading]['交通工具']['火车'][
+                                                                               trainkind] + 1
 
         print(treedict)
 

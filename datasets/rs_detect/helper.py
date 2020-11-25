@@ -4,6 +4,7 @@ import cv2
 import random
 from pprint import pprint
 from utils.misc import *
+import matplotlib.pyplot as plt
 
 
 def save_data_path():
@@ -163,13 +164,15 @@ def demo_fillPoly():
     area2 = np.array([[1000, 200], [1500, 200], [1500, 400], [1000, 400]])
 
     # cv2.fillPoly(img, [area1, area2], (255, 255, 255))
-    cv2.fillPoly(img, [area1], (255, 255, 255))  # 必须传入 list
+    cv2.fillPoly(img, [area1], (255, 255, 255))  # 必须传入 list; 区域填充标签
 
     plt.imshow(img)
     plt.show()
 
 
 def cvt_dec_to_seg_data():
+    """将 detect 数据集 框出的 box 转化成 seg 数据集
+    """
     root = '/datasets/rs_detect/railway/train'
 
     img_dir = os.path.join(root, 'images')
@@ -178,25 +181,47 @@ def cvt_dec_to_seg_data():
 
     img_ids = [p for p in os.listdir(img_dir) if p != '@eaDir']
 
+    stats = {
+        'rail': {
+            'anns': 0,
+            'imgs': 0,
+        },
+        'train': {
+            'anns': 0,
+            'imgs': 0,
+        }
+    }
+
     for img_id in tqdm(img_ids):
         img = cv2.imread(os.path.join(img_dir, img_id))
         h, w, _ = img.shape
-
         mask = np.zeros((h, w, 3), dtype=np.uint8)  # 为了 fillPoly 使用
-
         anns = read_txt_as_list(os.path.join(lbl_dir, img_id.replace('.png', '.txt')))
+
+        rail_pts, train_pts = [], []
         for ann in anns:
             obj = ann.split(' ')
             cat = obj[-2]
             pts = np.array(list(map(int, obj[:8]))).reshape((4, 2))
-
             if cat == 'rail':
-                cv2.fillPoly(mask, [pts], color=(1, 0, 0))
+                rail_pts.append(pts)
             elif cat == 'train':
-                cv2.fillPoly(mask, [pts], color=(7, 0, 0))
+                train_pts.append(pts)
+
+        # 先画 rail 再画 train; 防止 train 被 rail 覆盖 ?
+        if len(rail_pts) > 0:
+            cv2.fillPoly(mask, rail_pts, color=(1, 0, 0))
+            stats['rail']['imgs'] += 1
+            stats['rail']['anns'] += len(rail_pts)
+        if len(train_pts) > 0:
+            cv2.fillPoly(mask, train_pts, color=(2, 0, 0))
+            stats['train']['imgs'] += 1
+            stats['train']['anns'] += len(train_pts)
 
         mask = mask[:, :, 0]  # 取出第1维即可
         cv2.imwrite(os.path.join(msk_dir, img_id), mask)
+
+    pprint(stats)
 
 
 def cvt_4k_to_1k():
@@ -253,6 +278,6 @@ def cvt_4k_to_1k():
 
         write_list_to_txt(cvt_anns, os.path.join(cvt_lbl_dir, img_name.replace('.png', '.txt')))
 
-        # print(anns)
-        # print(cvt_anns)
-        # print()
+
+if __name__ == '__main__':
+    cvt_dec_to_seg_data()

@@ -11,6 +11,7 @@ def normalize_img(image):
 
 
 def preprocess(image, input_w, input_h):
+    image = np.asarray(image)
     image = cv2.resize(image, (input_w, input_h))
     out_image = normalize_img(image)
     out_image = out_image.transpose(2, 0, 1).reshape(1, 3, input_h, input_w)

@@ -3,6 +3,7 @@ import cv2
 import shutil
 from utils.misc import plt_img_target, mkdir, write_list_to_txt, read_txt_as_list
 import random
+from tqdm import tqdm
 
 root = '/datasets/rs_segment/railway'
 label_names = ['bg', 'rail', 'plant', 'buildings', 'road', 'land', 'water']
@@ -90,7 +91,7 @@ def save_train_paths():
         img_ids = [p for p in os.listdir(img_dir) if p != '@eaDir']
         if shuffle:
             random.shuffle(img_ids)
-            img_ids = img_ids[:39]
+            # img_ids = img_ids[:39]  # 部分取样
 
         for img in img_ids:
             img_paths.append(os.path.join(img_dir, img))
@@ -100,8 +101,53 @@ def save_train_paths():
     add_paths(data_dir='/datasets/rs_segment/railway/train')
     print('num:', len(img_paths))  # 61
     # todo: rail/train 加入样本太多了
-    add_paths(data_dir='/datasets/rs_detect/railway/train', shuffle=True)
+    add_paths(data_dir='/datasets/rs_detect/railway/train')
     print('num:', len(img_paths))  # 1062
 
     write_list_to_txt(img_paths, '/datasets/rs_segment/railway/train/train_img_paths.txt')
     write_list_to_txt(msk_paths, '/datasets/rs_segment/railway/train/train_target_paths.txt')
+
+
+def save_train_obstacle_paths():
+    img_paths, msk_paths = [], []
+
+    def add_paths(data_dir):
+        img_dir = os.path.join(data_dir, 'images')
+        msk_dir = os.path.join(data_dir, 'mask')
+
+        img_ids = [p for p in os.listdir(img_dir) if p != '@eaDir']
+        for img in img_ids:
+            img_paths.append(os.path.join(img_dir, img))
+            msk_paths.append(os.path.join(msk_dir, img))
+
+    add_paths(data_dir='/datasets/rs_detect/railway/train')
+    print('num:', len(img_paths))  # 1001
+
+    write_list_to_txt(img_paths, '/datasets/rs_segment/railway/train_obstacle/train_img_paths.txt')
+    write_list_to_txt(msk_paths, '/datasets/rs_segment/railway/train_obstacle/train_target_paths.txt')
+
+
+def save_valid_obstacle_paths():
+    img_paths, msk_paths = [], []
+
+    data_dir = '/datasets/rs_detect/railway/train'
+    img_dir = os.path.join(data_dir, 'images')
+    msk_dir = os.path.join(data_dir, 'mask')
+
+    img_ids = [p for p in os.listdir(img_dir) if p != '@eaDir']
+    for img in tqdm(img_ids):
+        msk_path = os.path.join(msk_dir, img)
+        msk = cv2.imread(msk_path, cv2.IMREAD_UNCHANGED)
+
+        if 1 in msk and 2 in msk:
+            img_paths.append(os.path.join(img_dir, img))
+            msk_paths.append(msk_path)
+
+    print('num:', len(img_paths))  # 1001
+    write_list_to_txt(img_paths, '/datasets/rs_segment/railway/valid/valid_img_paths.txt')
+    write_list_to_txt(msk_paths, '/datasets/rs_segment/railway/valid/valid_target_paths.txt')
+
+
+if __name__ == '__main__':
+    # save_train_obstacle_paths()
+    save_valid_obstacle_paths()

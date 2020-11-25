@@ -14,6 +14,7 @@ from models.ctrseg_net import CTRSEG
 from datasets.config.railway import seg_label_colors
 from utils.func_utils import preprocess
 from utils.misc import *
+from utils.vis import color_code_target, plt_img_target
 
 seg_classes = 7
 input_w, input_h = 960, 540
@@ -21,11 +22,11 @@ input_w, input_h = 960, 540
 
 def load_seg_model():
     model = CTRSEG(num_classes=seg_classes, pretrained=False)
-    predume = 'runs/railway/seg_cls7_res101_data100_Oct22_144156/model_best.pth'
-    checkpoint = torch.load(predume, map_location=lambda storage, loc: storage)
+    resume = 'runs/railway/seg_cls7_res101_data100_Oct22_144156/model_best.pth'
+    checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
     state_dict_ = checkpoint['state_dict']
     model.load_state_dict(state_dict_, strict=True)
-    print('loaded seg model from {}, epoch {}'.format(predume, checkpoint['epoch']))
+    print('loaded seg model from {}, epoch {}'.format(resume, checkpoint['epoch']))
 
     return model.eval().cuda()
 
@@ -65,6 +66,8 @@ def demo_dir():
         cv2.imwrite(f'{save_dir}/{img[:-4]}_seg.png', seg_img[:, :, ::-1])
 
 
+# 经纬度范围 keep
+# 图像路径 use
 def demo_img():
     img_dir = 'data/geo_hazard/5_异物侵线'
 
@@ -79,7 +82,8 @@ def demo_img():
             # segment
             pred = segment(model, image)
             cv2.imwrite(os.path.join(img_dir, img.replace('.png', '_class.png')), pred)
-            cv2.imwrite(os.path.join(img_dir, img.replace('.png', '_seg.png')), color_code_target(pred, label_colors)[:, :, ::-1])
+            cv2.imwrite(os.path.join(img_dir, img.replace('.png', '_seg.png')),
+                        color_code_target(pred, label_colors)[:, :, ::-1])
 
 
 if __name__ == '__main__':

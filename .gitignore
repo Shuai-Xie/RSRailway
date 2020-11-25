@@ -8,4 +8,6 @@ datasets/DOTA_devkit
 */__pycache__
 results
 
+demo/parse_railway*
+
 z.py

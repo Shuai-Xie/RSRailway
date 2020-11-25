@@ -2,6 +2,7 @@ from PIL import Image, ImageEnhance, ImageOps
 import random
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 BG_INDEX = 255
 
@@ -137,6 +138,76 @@ class RandomRotate:
         return sample
 
 
+class RandomFGCrop:
+    """
+    避免 crop 出 包含 bg 太多的 patch
+    random base_num = grid_size **2
+    """
+
+    def __init__(self, base_size, crop_size, over_lap=0.5, fg_thre=0.1, scales=(0.8, 1.2)):
+        self.base_size = min(base_size)
+        self.crop_size = min(crop_size)
+        self.scales = scales
+
+        self.stride = int(self.crop_size * (1 - over_lap))
+        self.grid_size = 1 + (base_size[0] - self.crop_size) // self.stride  # 宽度
+
+        self.fg_thre = fg_thre
+        self.bg_idx = 0
+
+    def _binary_target(self, target):
+        target[target != self.bg_idx] = 1
+        return target
+
+    def _rand_fg_coord(self, target):
+        tmp = np.array(target)
+        tmp = self._binary_target(tmp)
+        tmp = torch.from_numpy(tmp).unsqueeze(0).unsqueeze(0).float()  # 为了用 avgpool
+        fg_rates = F.avg_pool2d(tmp,
+                                kernel_size=self.crop_size,
+                                stride=self.stride).reshape(-1).numpy()  # 1D fg_rate
+
+        top_idxs = np.argsort(fg_rates)[::-1]
+        keep_num = np.sum(fg_rates >= self.fg_thre)
+        choose = random.choice(top_idxs[:keep_num]) if keep_num > 0 else top_idxs[0]  # HZ v1
+        return choose, fg_rates[choose]
+
+    def __call__(self, sample):
+        img, target = sample['img'], sample['target']
+        chose_idx, fg_rate = self._rand_fg_coord(target)
+
+        # 从 chose_idx 还原 crop patch 坐标
+        i, j = chose_idx // self.grid_size, chose_idx % self.grid_size
+        x1, y1 = self.stride * j, self.stride * i
+
+        img = img.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+        target = target.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+
+        # resize
+        short_size = random.randint(int(self.crop_size * self.scales[0]), int(self.crop_size * self.scales[1]))
+        ow = oh = short_size
+        # print('short_size:', short_size)
+        # random scale
+        img = img.resize((ow, oh), Image.BILINEAR)
+        target = target.resize((ow, oh), Image.NEAREST)
+
+        # scale 后短边 < 要 crop 尺寸，补图
+        if short_size < self.crop_size:
+            padh = self.crop_size - oh if oh < self.crop_size else 0
+            padw = self.crop_size - ow if ow < self.crop_size else 0
+            img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)  # img fill 0, 后面还有 normalize
+            # target = ImageOps.expand(target, border=(0, 0, padw, padh), fill=BG_INDEX)  # target fill bg_idx
+            target = ImageOps.expand(target, border=(0, 0, padw, padh), fill=BG_INDEX)  # target fill bg_idx
+        else:
+            x1 = random.randint(0, short_size - self.crop_size)
+            y1 = random.randint(0, short_size - self.crop_size)
+            img = img.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+            target = target.crop((x1, y1, x1 + self.crop_size, y1 + self.crop_size))
+
+        sample['img'], sample['target'] = img, target
+        return sample
+
+
 class RandomScaleCrop:
     def __init__(self, base_size, crop_size, scales=(0.8, 1.2)):
         self.base_size = min(base_size)
@@ -165,6 +236,7 @@ class RandomScaleCrop:
             padh = self.crop_size - oh if oh < self.crop_size else 0
             padw = self.crop_size - ow if ow < self.crop_size else 0
             img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)  # img fill 0, 后面还有 normalize
+            # target = ImageOps.expand(target, border=(0, 0, padw, padh), fill=BG_INDEX)  # target fill bg_idx
             target = ImageOps.expand(target, border=(0, 0, padw, padh), fill=BG_INDEX)  # target fill bg_idx
 
         # random crop
@@ -238,11 +310,12 @@ class ToTensor:
         return sample
 
 
-def get_transform(split, base_size, crop_size=None):
+def get_transform(split, base_size=None, crop_size=None):
     if split == 'train':
         return Compose([
             # sampler
-            RandomScaleCrop(base_size, crop_size, scales=(1.0, 1.2)),
+            # RandomScaleCrop(base_size, crop_size, scales=(0.5, 1.0)),
+            RandomFGCrop(base_size, crop_size, scales=(0.5, 1.5)),
             # flip
             RandomHorizontalFlip(),
             RandomVerticalFlip(),

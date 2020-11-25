@@ -8,7 +8,7 @@ from utils.misc import read_txt_as_list
 
 class RailwaySeg(Dataset):
 
-    def __init__(self, root, split, base_size, crop_size):
+    def __init__(self, root, split, base_size=None, crop_size=None):
         data_dir = os.path.join(root, split)
 
         self.img_paths = read_txt_as_list(os.path.join(data_dir, f'{split}_img_paths.txt'))
