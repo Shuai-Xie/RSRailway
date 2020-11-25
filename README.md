@@ -12,9 +12,9 @@
 
 <p align="center">
     <span><b>边坡滑坡</b></span><br>
-    <img src='https://img.shields.io/static/v1?label=&message=轨道&color=blue'> +
-    <img src='https://img.shields.io/static/v1?label=&message=火车&color=red'> =
-    <img src='https://img.shields.io/static/v1?label=&message=预警区&color=brightgreen'>
+    <img src='https://img.shields.io/static/v1?label=&message=rail&color=blue'> +
+    <img src='https://img.shields.io/static/v1?label=&message=train&color=red'> =
+    <img src='https://img.shields.io/static/v1?label=&message=alert area&color=brightgreen'>
     <img src='assets/边坡滑坡.png'>
     <span><b>羊群入侵</b></span>
     <img src='assets/羊群.png'>
@@ -65,7 +65,7 @@
 ### 2. 恶劣天气预警
 
 <p align="center">
-    <img src='assets/沙尘天气.png' width="70%">
+    <img src='assets/沙尘天气.png'>
 </p>
 
 
